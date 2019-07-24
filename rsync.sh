@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# need to change the working directory because someone might call this script directly with the --include-from=rsync_list.txt argument
+cd "$(dirname "$0")"
+
 lockfile -r 0 /run/lock/rsync.lock || exit 1
 
 # https://linux.die.net/man/1/rsync
