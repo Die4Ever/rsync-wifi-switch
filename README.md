@@ -8,3 +8,8 @@ check the example crontab for how to use this, you can also skip the check_rsync
 */10 * * * * rsync-wifi-switch/rsync.sh --include-from=rsync_list.txt user@servername:"./" "~/downloads/"
 
 you'll also need to make rsync_list.txt, look at example_rsync_list.txt to see how it works or just look up how --include-from filters work in rsync
+
+if you want to get rid of the file that this downloaded without adjusting filters, you can easily just do
+echo "" > dumbfile.zip
+this will empty the file and update the modified time, so rsync won't overwrite a newer file
+you can also use the touch command to set the modified date to the future
