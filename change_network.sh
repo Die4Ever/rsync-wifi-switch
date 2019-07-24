@@ -1,5 +1,9 @@
 #!/bin/bash
 
+cd "$(dirname "$0")"
+
+{
+
 defaultwifi=wifiname
 bandwidthwifi=otherwifiname
 
@@ -27,4 +31,6 @@ nmcli c | head -2
 rm -f /run/lock/wifi.lock
 
 echo ""
+
+} >>rsync_log.txt 2>&1
 

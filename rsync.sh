@@ -1,5 +1,9 @@
 #!/bin/bash
 
+cd "$(dirname "$0")"
+
+{
+
 lockfile -r 0 /run/lock/rsync.lock || exit 1
 
 # https://linux.die.net/man/1/rsync
@@ -16,4 +20,6 @@ echo -e "\ndone with rsync, outputting disk space"
 df -h "${@: -1}"
 
 rm -f /run/lock/rsync.lock
+
+} >>rsync_log.txt 2>&1
 
