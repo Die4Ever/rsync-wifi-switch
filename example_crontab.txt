@@ -1,0 +1,5 @@
+
+# check_rsync.sh automatically changes its working directory, and redirects its output to logs
+*/10 * * * * rsync-wifi-switch/check_rsync.sh ./rsync.sh --include-from=rsync_list.txt user@servername:"./" "~/downloads/"
+0 0 * * * rsync-wifi-switch/rotate_logs.sh
+

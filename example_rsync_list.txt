@@ -1,0 +1,15 @@
+#you have to include the music folder itself in order to list the things inside of it so they can be compared to the filters
++ music
+# *** means wildcard including subdirectories
++ music/***
+# you can also just do this to include the folder and everything in it with a single line
+## but it would also include a folder named videos2/ or videos-temp/ as an example
++ videos***
+
+#exclude things by default at the end, things that were explicitly included are already in
+- temp
+- ***.tmp
+- ***.log
+
+#if you want to grab everything in the source folder by default then comment out the line below
+- *
