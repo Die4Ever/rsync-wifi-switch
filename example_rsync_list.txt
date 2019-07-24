@@ -2,6 +2,7 @@
 + music
 # *** means wildcard including subdirectories
 + music/***
+
 # you can also just do this to include the folder and everything in it with a single line
 ## but it would also include a folder named videos2/ or videos-temp/ as an example
 + videos***
