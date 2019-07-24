@@ -6,7 +6,8 @@ the scripts all adjust their current working directory and automatically redirec
 
 check the example crontab for how to use this, you can also skip the check_rsync and change_network stuff if you're not worried about that, then your crontab entry would look like (rsync_wrapper.sh adjusts the working directory and redirects the output to the log, which is nice when running as a cron)
 
-*/10 * * * * rsync-wifi-switch/rsync_wrapper.sh --include-from=rsync_list.txt user@servername:"./" "~/downloads/"
+\# make sure to test with --dry-run first
+*/10 * * * * rsync-wifi-switch/rsync_wrapper.sh --dry-run --include-from=rsync_list.txt user@servername:"./" "~/downloads/"
 
 you'll also need to make rsync_list.txt, look at example_rsync_list.txt to see how it works or just look up how --include-from filters work in rsync
 
