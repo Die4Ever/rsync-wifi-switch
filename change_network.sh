@@ -18,6 +18,7 @@ nmcli c up "$bandwidthwifi"
 exitcode=$?
 if [ $exitcode != 0 ]; then rm -f /run/lock/wifi.lock ; exit $exitcode; fi
 
+sleep 1
 command=$1
 shift
 echo "...running $command..."
@@ -32,5 +33,6 @@ rm -f /run/lock/wifi.lock
 
 echo ""
 
-} >>rsync_log.txt 2>&1
+}
+# >>rsync_log.txt 2>&1
 

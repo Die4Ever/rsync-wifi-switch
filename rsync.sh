@@ -11,8 +11,9 @@ lockfile -r 0 /run/lock/rsync.lock || exit 1
 # --modify-window=1 gives 1 seconds of margin of error for modification times, need this for NTFS, fine for other filesystems too
 # --no-perms need this for NTFS, doesn't matter for other filesystems for our usecase
 # --omit-dir-times might need this for NTFS, probably doesn't matter for other filesystems
+# add the --delete flag if you want it to delete files that are no longer on the source, but be careful and always test with --dry-run
 date
-rsync --update --delete --force --recursive --modify-window=2 --no-perms --human-readable --progress --stats --omit-dir-times $@
+rsync --dry-run --update --force --recursive --modify-window=2 --no-perms --human-readable --progress --stats --omit-dir-times $@
 date
 # show the disk space based on the last argument (the destination path)
 echo -e "\ndone with rsync, outputting disk space"
