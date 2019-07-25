@@ -12,6 +12,7 @@ lockfile -r 0 /run/lock/rsync.lock || exit 1
 # --no-perms need this for NTFS, doesn't matter for other filesystems for our usecase
 # --omit-dir-times might need this for NTFS, probably doesn't matter for other filesystems
 # add the --delete flag if you want it to delete files that are no longer on the source, but be careful and always test with --dry-run
+# remove the --dry-run flag when you're done testing
 date
 rsync --dry-run --update --force --recursive --modify-window=2 --no-perms --human-readable --progress --stats --omit-dir-times $@
 date
