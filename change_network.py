@@ -1,38 +1,50 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-# enable debugging
 import subprocess
 import re
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description='Optional app description')
-parser.add_argument('--network', type=str)
-#parser.add_argument('--command', type=str, default='')
-parser.add_argument('command', nargs='*', help='Command to run')
-args = parser.parse_args()
+parser.add_argument('--network', type=str, help='Network to use for running the command')
+parser.add_argument('--default-network', type=str, help='Network to switch to after running the command')
+(args, command) = parser.parse_known_args()
 wifi_locked = False
+
+def main():
+    global args
+    if set_network(args.network):
+        ret = run_command()
+    if args.default_network:
+        set_network(args.default_network)
+    wifi_unlock()
+    print("exiting with code "+str(ret))
+    exit(ret)
+
 
 def calla(cmds):
     print("running", cmds)
-    ret = 0 #subprocess.Popen(cmds).wait()
+    ret = subprocess.Popen(cmds).wait()
     print("exit code == "+str(ret))
     return ret
 
 def call(cmd):
     print("running", cmd)
-    ret = 0 #subprocess.Popen(cmd, shell=True).wait()
+    ret = subprocess.Popen(cmd, shell=True).wait()
     print("exit code == "+str(ret))
     return ret
 
 def run_command():
-    global args
-    if len(args.command) == 0:
+    global command
+    if len(command) == 0:
+        print("no command to run")
         return 0
-    return calla(args.command)
+    return calla(command)
 
 def check_output(cmds):
     print("running", cmds)
     ret = subprocess.check_output(cmds).decode("utf-8")
-    print("command got\n" + ret)
+    #print("command got\n" + ret)
     return ret
 
 def get_current_network():
@@ -53,30 +65,48 @@ def disconnect(network):
     return calla(["nmcli", "c", "down", network])
 
 def set_network(network):
+    print("set_network("+network+")")
     (current, inf) = get_current_network()
     if current == network:
+        print("we're already on "+current+", continuing")
         return True
     if network_in_use(inf):
+        print(current+" is currently in use, bailing")
         return False
     if wifi_lock() == False:
+        print("failed to aquire wifi lock, bailing")
         return False
     disconnect(current)
     ret = connect(network)
-    ret = run_command()
-    wifi_unlock()
     return ret
 
 def test_network():
     #make sure the connection works
-    calla(["echo", "test_network"])
+    print("this is where I would test the network to make sure it can reach the internet")
+    #calla(["echo", "test_network"])
 
 def network_in_use(inf):
-    #out = check_output(["bwm-ng",  "-o",  "csv",  "-t", "120000", "-c",  "1"])
-    out = check_output(["bwm-ng",  "-o",  "csv",  "-t", "1000", "-c",  "1"])
+    # MPC seems to buffer heavily over SMB, so might need to use 120 seconds
+    out = check_output(["bwm-ng",  "-o",  "csv",  "-t", "12000", "-c",  "1"])
+    lines = out.splitlines()
+    for line in lines:
+        split = line.split(';')
+        if split[1] == inf:
+            Bps = float(split[4])
+            MBps = Bps / (1024 * 1024)
+            print(inf+" is doing "+str(MBps)+" MBps")
+            if MBps > 0.1:
+                return True
+            else:
+                return False
     return False
 
 def wifi_lock():
     global wifi_locked
+    # do I even need wifi locking anymore?
+    # I already have the cron.lock and rsync.lock, and I check if the network is in use before switching...
+    if wifi_locked:
+        return True
     ret = calla(["lockfile", "-r", "0", "/run/lock/wifi.lock"])
     if ret == 0:
         wifi_locked=True
@@ -85,7 +115,14 @@ def wifi_lock():
 
 def wifi_unlock():
     global wifi_locked
+    ret = 0
     if wifi_locked:
         ret = calla(["rm", "-f", "/run/lock/wifi.lock"])
+    if ret == 0:
+        wifi_locked = False
+        return True
+    return False
 
-set_network(args.network)
+if __name__=="__main__":
+    main()
+
