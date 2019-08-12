@@ -12,7 +12,7 @@ bandwidthwifi=otherwifiname
 command=$1
 shift
 #check if there are any changes to reduce how often we switch networks
-$command --dry-run $@ | grep 'Number of regular files transferred: 0foobar'
+$command --dry-run $@ | grep 'Number of regular files transferred: 0'
 exitcode=$?
 if [ $exitcode == 1 ]; then python3 change_network.py --network="$bandwidthwifi" --default-network="$defaultwifi" $command "$@" ; fi
 
