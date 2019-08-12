@@ -5,6 +5,10 @@ import re
 import argparse
 import sys
 
+#flush after every print
+import functools
+print = functools.partial(print, flush=True)
+
 parser = argparse.ArgumentParser(description='Optional app description')
 parser.add_argument('--network', type=str, help='Network to use for running the command')
 parser.add_argument('--default-network', type=str, help='Network to switch to after running the command')
