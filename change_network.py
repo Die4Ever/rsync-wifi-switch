@@ -1,18 +1,26 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 # -*- coding: UTF-8 -*-# enable debugging
 import subprocess
 import re
 import argparse
 import sys
+import os
+import time
+
+#flush after every print
+import functools
+print = functools.partial(print, flush=True)
 
 parser = argparse.ArgumentParser(description='Optional app description')
 parser.add_argument('--network', type=str, help='Network to use for running the command')
 parser.add_argument('--default-network', type=str, help='Network to switch to after running the command')
+parser.add_argument('--check-seconds', type=int, help='How long in seconds to check if a network is in use', default=120)
 (args, command) = parser.parse_known_args()
 wifi_locked = False
 
 def main():
     global args
+    ret = 1
     if set_network(args.network):
         ret = run_command()
     if args.default_network:
@@ -36,10 +44,13 @@ def call(cmd):
 
 def run_command():
     global command
+    print()
     if len(command) == 0:
         print("no command to run")
         return 0
-    return calla(command)
+    ret = calla(command)
+    print()
+    return ret
 
 def check_output(cmds):
     print("running", cmds)
@@ -58,14 +69,16 @@ def get_current_network():
 
 def connect(network):
     print("connecting to "+network)
-    return calla(["nmcli", "c", "up", network])
+    ret = calla(["nmcli", "c", "up", network])
+    time.sleep(2)
+    return ret
 
 def disconnect(network):
     print("disconnecting from "+network)
     return calla(["nmcli", "c", "down", network])
 
 def set_network(network):
-    print("set_network("+network+")")
+    print("\n\nset_network("+network+")")
     (current, inf) = get_current_network()
     if current == network:
         print("we're already on "+current+", continuing")
@@ -78,7 +91,7 @@ def set_network(network):
         return False
     disconnect(current)
     ret = connect(network)
-    return ret
+    return ret == 0
 
 def test_network():
     #make sure the connection works
@@ -87,7 +100,9 @@ def test_network():
 
 def network_in_use(inf):
     # MPC seems to buffer heavily over SMB, so might need to use 120 seconds
-    out = check_output(["bwm-ng",  "-o",  "csv",  "-t", "12000", "-c",  "1"])
+    global args
+    ms = args.check_seconds * 1000
+    out = check_output(["bwm-ng",  "-o",  "csv",  "-t", str(ms), "-c",  "1"])
     lines = out.splitlines()
     for line in lines:
         split = line.split(';')
