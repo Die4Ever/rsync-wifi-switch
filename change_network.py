@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='Optional app description')
 parser.add_argument('--network', type=str, help='Network to use for running the command')
 parser.add_argument('--default-network', type=str, help='Network to switch to after running the command')
 parser.add_argument('--check-seconds', type=int, help='How long in seconds to check if a network is in use', default=120)
+parser.add_argument('--max-speed', type=int, help='Max speed to allow switching networks', default=50)
 (args, command) = parser.parse_known_args()
 wifi_locked = False
 
@@ -89,7 +90,7 @@ def set_network(network):
     if wifi_lock() == False:
         print("failed to aquire wifi lock, bailing")
         return False
-    disconnect(current)
+    #disconnect(current)
     ret = connect(network)
     return ret == 0
 
@@ -102,15 +103,16 @@ def network_in_use(inf):
     # MPC seems to buffer heavily over SMB, so might need to use 120 seconds
     global args
     ms = args.check_seconds * 1000
+    max_speed = args.max_speed
     out = check_output(["bwm-ng",  "-o",  "csv",  "-t", str(ms), "-c",  "1"])
     lines = out.splitlines()
     for line in lines:
         split = line.split(';')
         if split[1] == inf:
             Bps = float(split[4])
-            MBps = Bps / (1024 * 1024)
-            print(inf+" is doing "+str(MBps)+" MBps")
-            if MBps > 0.1:
+            KBps = Bps / 1024
+            print(inf+" is doing "+str(KBps)+" KBps")
+            if KBps > max_speed:
                 return True
             else:
                 return False
