@@ -14,7 +14,7 @@ lockfile -r 0 /run/lock/rsync.lock || exit 1
 # add the --delete flag if you want it to delete files that are no longer on the source, but be careful and always test with --dry-run
 # remove the --dry-run flag when you're done testing
 date
-rsync --dry-run --inplace --append --partial --force --recursive --modify-window=2 --no-perms --human-readable --progress --stats --omit-dir-times "$@"
+rsync --dry-run --prune-empty-dirs --inplace --append --partial --force --recursive --modify-window=2 --no-perms --human-readable --progress --stats --omit-dir-times "$@"
 date
 # show the disk space based on the last argument (the destination path)
 echo -e "\ndone with rsync, outputting disk space"
